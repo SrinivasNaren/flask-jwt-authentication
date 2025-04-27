@@ -1,0 +1,147 @@
+
+
+### **1. Introduction: What is JWT Authentication?**
+
+**JWT (JSON Web Tokens)** is a secure way to transmit information between two parties (like a user and a server) in a compact, URL-safe format. It’s commonly used for authentication, where the server creates a token that proves the user is logged in, and the client sends this token with each request to access protected routes.
+
+In this project, we built a **Flask app** that uses JWT to authenticate users and secure API routes.
+
+---
+
+### **2. Project Structure and Flow**
+
+Here’s the **step-by-step process** we followed to implement JWT authentication in the Flask app:
+
+---
+
+#### **Step 1: Set up Flask and JWT**
+We started by setting up a Flask app and installing the necessary libraries:
+
+- **Flask**: For creating the web application.
+- **Flask-JWT-Extended**: For handling JWT creation and validation.
+
+To make these libraries work, we installed them using `pip` in the terminal.
+
+---
+
+#### **Step 2: Create a Fake User Database**
+We created a **fake user database** to store username and password information. This was just for the sake of the project, to simulate a real-world scenario where users would log in with their credentials.
+
+Example:
+```python
+users = {
+    "user1": {"password": "password123"},
+    "user2": {"password": "mypassword"}
+}
+```
+
+---
+
+#### **Step 3: Create the Login Route**
+The **login route** is where users can send their username and password to the server. The server checks if the user exists in our fake database and whether the password matches.
+
+If successful, we create a JWT token and send it back to the client.
+
+Example:
+```python
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.json.get('username', None)
+    password = request.json.get('password', None)
+
+    if username in users and users[username]['password'] == password:
+        access_token = create_access_token(identity=username)
+        return jsonify(access_token=access_token), 200
+    return jsonify({"msg": "Bad username or password"}), 401
+```
+
+---
+
+#### **Step 4: Create the Protected Route**
+We created a **protected route** called `/notes`. This route can only be accessed by users who provide a valid JWT token in their request header.
+
+The **JWT token** is used to verify the user and allow them to access or modify the notes.
+
+We used the `@jwt_required()` decorator to protect the route and ensure only logged-in users (with a valid token) can access it.
+
+Example:
+```python
+@app.route('/notes', methods=['GET', 'POST'])
+@jwt_required()
+def notes():
+    current_user = get_jwt_identity()
+    # Code for handling GET and POST requests
+```
+
+---
+
+#### **Step 5: Testing the API with Postman**
+
+Once the routes were created, we used **Postman** to test the application.
+
+1. **Login Request**:
+   - **Method**: POST
+   - **URL**: `http://127.0.0.1:5000/login`
+   - **Body**: 
+     ```json
+     {
+         "username": "user1",
+         "password": "password123"
+     }
+     ```
+
+   - If successful, we received a JWT token:
+     ```json
+     {
+         "access_token": "your_jwt_token_here"
+     }
+     ```
+
+2. **Access Notes Route**:
+   - **Method**: GET or POST
+   - **URL**: `http://127.0.0.1:5000/notes`
+   - **Headers**: Add the **Authorization** header with the value:
+     ```text
+     Bearer your_jwt_token_here
+     ```
+
+   - If the token is valid, you can access or modify the notes.
+
+---
+
+### **3. Explanation of Each Part**
+
+- **Flask**: The Flask framework is used to build the web application that provides routes and handles requests.
+- **JWT**: The JWT (JSON Web Token) is a secure way of sending information between the server and client. In this project, it was used to authenticate users.
+- **Flask-JWT-Extended**: This library is an extension for Flask to easily handle JWT tokens.
+
+---
+
+### **4. Flowchart Breakdown**
+
+Here’s a simple **flowchart** of what we did:
+
+1. **User sends login request**:
+   - User sends their **username** and **password** to the `/login` endpoint.
+
+2. **Server verifies credentials**:
+   - The server checks if the **username** exists in the fake database and whether the **password** is correct.
+
+3. **Generate JWT Token**:
+   - If successful, the server generates a **JWT token** and returns it to the user.
+
+4. **User accesses protected route**:
+   - The user sends a **GET/POST request** to `/notes` with the JWT token in the header.
+
+5. **Server verifies the token**:
+   - The server checks the token's validity using the `@jwt_required()` decorator.
+   - If valid, the server grants access to the notes.
+
+---
+
+### Conclusion**
+
+In this project, we learned how to use Flask and JWT to secure API routes, authenticate users, and manage protected routes. The project is a great starting point for understanding how modern web applications use tokens for user authentication and authorization.
+
+This project has set the foundation for creating a secure API, and you can build on it to create more complex applications!
+
